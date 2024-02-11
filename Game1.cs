@@ -10,6 +10,9 @@ namespace MySimulationLife
     {
         Texture2D characterTexture;
         Vector2 characterPosition;
+        Vector2? targetPosition;
+
+        float movingSpeed = 100; // Moving speed of the object
 
         int screenWidth;
         int screenHeight;
@@ -41,8 +44,6 @@ namespace MySimulationLife
 
             characterPosition = new Vector2(centerX, centerY);
 
-            Debug.WriteLine("Screen info " + screenWidth + " " + screenHeight);
-
             base.Initialize();
         }
 
@@ -51,10 +52,9 @@ namespace MySimulationLife
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             characterTexture = Content.Load<Texture2D>("char");
+
             characterWidth = characterTexture.Width;
             characterHeight = characterTexture.Height;
-
-            Debug.WriteLine("Character Texture info " + characterTexture);
         }
 
         protected override void Update(GameTime gameTime)
@@ -68,9 +68,23 @@ namespace MySimulationLife
 
             if ( mouseState.LeftButton == ButtonState.Pressed )
             {
-                int x = 0;
-                Debug.WriteLine("Current position of char: " + characterPosition);
-                Debug.WriteLine("Current clicked position: " + mouseState.Position);
+                targetPosition = new Vector2(mouseState.X, mouseState.Y);
+            }
+
+            if ( targetPosition.HasValue )
+            {
+                Vector2 direction = targetPosition.Value - characterPosition;
+                
+                if ( direction.Length() > 1 )
+                {
+                    direction.Normalize();
+                    characterPosition += direction * movingSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                }
+                else
+                {
+                    targetPosition = null;
+                }
+                //Debug.WriteLine("Direction " + direction);
             }
 
             base.Update(gameTime);
